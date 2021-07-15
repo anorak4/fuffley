@@ -49,22 +49,27 @@ serverless_fastapi_lambda_func = aws.lambda_.Function("serverless-fastapi-lambda
 ####################################################################
 
 my_demo_api = aws.apigateway.RestApi("myDemoAPI", description="This is my API for demonstration purposes")
-my_demo_resource = aws.apigateway.Resource("myDemoResource",
+my_demo_resource = aws.apigateway.Resource("proxy",
     rest_api=my_demo_api.id,
     parent_id=my_demo_api.root_resource_id,
-    path_part="mydemoresource")
+    path_part="{PROXY+}")
 my_demo_method = aws.apigateway.Method("myDemoMethod",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api]),
     rest_api=my_demo_api.id,
     resource_id=my_demo_resource.id,
     http_method="ANY",
     authorization="NONE")
+
+# lambda_ARN=serverless_fastapi_lambda_func.invoke_arn
+# print("This is ARN"+lambda_ARN)
 my_demo_integration = aws.apigateway.Integration("myDemoIntegration",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_method, serverless_fastapi_lambda_func]),
     rest_api=my_demo_api.id,
     resource_id=my_demo_resource.id,
-    http_method=my_demo_method.http_method,
+    http_method="ANY",
     type="AWS_PROXY",
-    integration_http_method=my_demo_method.http_method,
-    uri="arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/"+serverless_fastapi_lambda_func.arn
+    integration_http_method="POST",
+    uri=pulumi.Output.concat("arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/",serverless_fastapi_lambda_func.arn,"/invocations")
 #     cache_key_parameters=["method.request.path.param"],
 #     cache_namespace="foobar",
 #     timeout_milliseconds=29000,
@@ -113,6 +118,7 @@ my_demo_integration = aws.apigateway.Integration("myDemoIntegration",
 
 # Create a deployment of the Rest API.
 deployment = aws.apigateway.Deployment("api-deployment",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_method, my_demo_integration]),
     rest_api=my_demo_api.id,
     # Note: Set to empty to avoid creating an implicit stage, we'll create it
     # explicitly below instead.
