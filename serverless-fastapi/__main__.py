@@ -35,8 +35,8 @@ serverless_fastapi_lambda_func = aws.lambda_.Function("serverless_fastapi_lambda
     role=iam.lambda_role.arn,
     runtime="python3.7",
     handler="main.handler",
-    s3_bucket=serverless_fastapi_bucket,
-    s3_key=serverless_fastapi_kms,
+    s3_bucket="serverless_fastapi_bucket",
+    s3_key="someobject",
     s3_object_version=serverless_fastapi_bucket_object    
     })
 )
