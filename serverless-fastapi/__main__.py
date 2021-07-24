@@ -49,10 +49,30 @@ serverless_fastapi_lambda_func = aws.lambda_.Function("serverless-fastapi-lambda
 ####################################################################
 
 my_demo_api = aws.apigateway.RestApi("myDemoAPI", description="This is my API for demonstration purposes")
+# my_demo_root_resource = aws.apigateway.Resource("root",
+#     rest_api=my_demo_api.id,
+#     parent_id=my_demo_api.root_resource_id,
+#     path_part="1")
+# my_demo_root_method = aws.apigateway.Method("myDemoRootMethod",
+#     opts=pulumi.ResourceOptions(depends_on=[my_demo_root_resource, my_demo_api]),
+#     rest_api=my_demo_api.id,
+#     resource_id=my_demo_root_resource.id,
+#     http_method="ANY",
+#     authorization="NONE")
+
+my_demo_root_method = aws.apigateway.Method("myDemoRootMethod",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_api]),
+    rest_api=my_demo_api.id,
+    resource_id=my_demo_api.root_resource_id,
+    http_method="ANY",
+    authorization="NONE")
+
 my_demo_resource = aws.apigateway.Resource("proxy",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_api]),
     rest_api=my_demo_api.id,
     parent_id=my_demo_api.root_resource_id,
-    path_part="{PROXY+}")
+    path_part="{proxy+}")
+
 my_demo_method = aws.apigateway.Method("myDemoMethod",
     opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api]),
     rest_api=my_demo_api.id,
@@ -62,8 +82,30 @@ my_demo_method = aws.apigateway.Method("myDemoMethod",
 
 # lambda_ARN=serverless_fastapi_lambda_func.invoke_arn
 # print("This is ARN"+lambda_ARN)
+my_demo_root_integration = aws.apigateway.Integration("myDemoRootIntegration",
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_root_method, serverless_fastapi_lambda_func]),
+    rest_api=my_demo_api.id,
+    resource_id=my_demo_api.root_resource_id,
+    http_method="ANY",
+    type="AWS_PROXY",
+    integration_http_method="POST",
+    uri=pulumi.Output.concat("arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/",serverless_fastapi_lambda_func.arn,"/invocations")
+#     cache_key_parameters=["method.request.path.param"],
+#     cache_namespace="foobar",
+#     timeout_milliseconds=29000,
+#     request_parameters={
+#         "integration.request.header.X-Authorization": "'static'",
+#     },
+#     request_templates={
+#         "application/xml": """{
+#    "body" : $input.json('$')
+# }
+# """,
+#     }
+)
+
 my_demo_integration = aws.apigateway.Integration("myDemoIntegration",
-    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_method, serverless_fastapi_lambda_func]),
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_root_method, serverless_fastapi_lambda_func]),
     rest_api=my_demo_api.id,
     resource_id=my_demo_resource.id,
     http_method="ANY",
@@ -83,7 +125,6 @@ my_demo_integration = aws.apigateway.Integration("myDemoIntegration",
 # """,
 #     }
 )
-
 # # Create a single Swagger spec route handler for a Lambda function.
 # def swagger_route_handler(arn):
 #     return ({
@@ -118,7 +159,7 @@ my_demo_integration = aws.apigateway.Integration("myDemoIntegration",
 
 # Create a deployment of the Rest API.
 deployment = aws.apigateway.Deployment("api-deployment",
-    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_method, my_demo_integration]),
+    opts=pulumi.ResourceOptions(depends_on=[my_demo_resource, my_demo_api, my_demo_root_method, my_demo_integration]),
     rest_api=my_demo_api.id,
     # Note: Set to empty to avoid creating an implicit stage, we'll create it
     # explicitly below instead.
