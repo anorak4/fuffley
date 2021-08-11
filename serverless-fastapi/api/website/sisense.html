@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+    </head>
+    <body> 
+        <div>DEBUG: {{location}}js/sisense.js</div>
+        <div id = "sisenseApp">
+            <div id = "widget1" style = "height: 400px; width: 35%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
+            <div id = "widget2" style = "height: 400px; width: 40%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
+            <div id = "widget3" style = "height: 400px; width: 100%; float: left; top: 500px; display: block; margin-top:30px;"></div>
+            <div id = "filters" style = "height: 400px; width: 25%; float: left; top: 80px; left: 0px; display: inline; margin-top:80px;"></div>
+        </div>
+        <script type="text/javascript" src="{{location}}js/sisense.js"></script> <!-- replace with your Sisense server address -->
+        <script type = "text/javascript">
+            Sisense.connect('{{location}}) // replace with your Sisense server address
+            .then((app) => {
+                app.dashboards.load('5829b46b3452420000047') //replace with your dashboard id
+                .then((dash) => {
+                    dash.widgets.get('58b45b4ce6ef16b0b4000041').container = document.getElementById("widget1"); //replace with one of your widgets' id.
+                    dash.widgets.get('58b45b4ce6ef16b0b4000042').container = document.getElementById("widget2"); //replace with another of your widgets' id.
+                    dash.widgets.get('58b45b4ce6ef16b0b4000043').container = document.getElementById("widget3"); //replace with another of your widgets' id.
+                    dash.renderFilters(document.getElementById("filters"));
+                    dash.refresh();
+                })
+                .catch((e) => {
+                    console.error(e);
+                });
+            })
+            .catch((e) => {
+                console.error(e);
+            });
+        </script>
+    </body>
+</html>

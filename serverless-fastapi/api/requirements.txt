@@ -3,3 +3,4 @@ mangum
 requests>=2.24.0
 uvicorn==0.12.2
 jinja2
+pyjwt
