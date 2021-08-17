@@ -1,27 +1,34 @@
+<!-- Sisense.js Example with JWT integration (without redirect to SSO handler) -->
 <!DOCTYPE HTML>
+<!-- Your Sisense container elements and other DOM here -->
+<div id="sisenseApp"></div>
+
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
     </head>
     <body> 
-        <div>DEBUG: {{location}}js/sisense.js</div>
         <div id = "sisenseApp">
-            <div id = "widget1" style = "height: 400px; width: 35%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
-            <div id = "widget2" style = "height: 400px; width: 40%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
-            <div id = "widget3" style = "height: 400px; width: 100%; float: left; top: 500px; display: block; margin-top:30px;"></div>
-            <div id = "filters" style = "height: 400px; width: 25%; float: left; top: 80px; left: 0px; display: inline; margin-top:80px;"></div>
+            <div id = "widget1" style = "height: 400px; width: 35%; float: left; top: 10px; display: inline; margin-top:30px;"></div>
+		    <div id = "widget2" style = "height: 400px; width: 40%; float: left; top: 10px; display: inline; margin-top:30px;"></div>
+            <div style = "height: 400px; width: 40%; float: left; top: 500px; display: inline; margin-top:30px;">{{location}}</div>
         </div>
-        <script type="text/javascript" src="{{location}}js/sisense.js"></script> <!-- replace with your Sisense server address -->
+	<script type="text/javascript" src="{{location}}/api/v1/plugins/get_info"></script> <!-- Since we want to avoid the redirect to an SSO handler, we make an inital request to sisense with JWT token. On successful auth, 
+	Sisense passes the cookie which is then used by Sisense.Js and other methods to retrieve Sisense dashboards/widgets. For async loading, please make sure that this call is made
+	before the other requests.
+    {{location}}: {{hostname}}/jwt?jwt=<token>&return_to={{hostname}} -->
+        
+	<script type="text/javascript" src="{{hostname}}/js/sisense.v1.js"></script> <!-- {{hostname}}: your Sisense server address. Again during async loading, please make
+    sure the js library is loaded before its methods are called. -->
         <script type = "text/javascript">
-            Sisense.connect('{{location}}) // replace with your Sisense server address
+            console.log("starts here");
+            Sisense.connect('{{hostname}}')
             .then((app) => {
-                app.dashboards.load('5829b46b3452420000047') //replace with your dashboard id
+                app.dashboards.load('603533575edfde002b356ccf') // Replace with your dashboard id. For performance, consider loading widgets individually instead of loading the entire dashboard.
                 .then((dash) => {
-                    dash.widgets.get('58b45b4ce6ef16b0b4000041').container = document.getElementById("widget1"); //replace with one of your widgets' id.
-                    dash.widgets.get('58b45b4ce6ef16b0b4000042').container = document.getElementById("widget2"); //replace with another of your widgets' id.
-                    dash.widgets.get('58b45b4ce6ef16b0b4000043').container = document.getElementById("widget3"); //replace with another of your widgets' id.
-                    dash.renderFilters(document.getElementById("filters"));
-                    dash.refresh();
+                    dash.widgets.get('6035345c5edfde002b356cdc').container = document.getElementById("widget1"); // Replace with one of your widgets' id.
+                    dash.widgets.get('603533ad5edfde002b356cd8').container = document.getElementById("widget2");
+		    dash.refresh();
                 })
                 .catch((e) => {
                     console.error(e);

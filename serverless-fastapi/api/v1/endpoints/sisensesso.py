@@ -18,10 +18,10 @@ router = APIRouter()
 templates = Jinja2Templates(directory="website")
 
 @router.get("/sisensesso", response_class=HTMLResponse)
-async def read_item(request: Request, return_to: str = "/", hostname: str = "sample", shared_key: str = ""):
+async def read_item(request: Request, return_to: str = "", hostname: str = "sample", shared_key: str = "", username: str = "sso-test-user"):
     payload = {
     "iat": int(time.time()),
-    "sub": "sso-test-user",
+    "sub": username,
     "jti": str(uuid.uuid4())
     #"exp" : int(time.time()) + 10000, #optional- expiration time
     }
@@ -36,5 +36,5 @@ async def read_item(request: Request, return_to: str = "/", hostname: str = "sam
 
     if return_to is not None:
         location += "&return_to=" + hostname + return_to    
-    return templates.TemplateResponse("sisense.html", {'request': request, 'location': location})
+    return templates.TemplateResponse("sisense.html", {'request': request, 'location': location, 'hostname': hostname})
 
