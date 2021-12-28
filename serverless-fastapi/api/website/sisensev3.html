@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<!-- Your Sisense container elements and other DOM here -->
+<div id="sisenseApp"></div>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+    </head>
+    <body> 
+        <div id = "sisenseApp">
+            <div id = "widget1" style = "height: 400px; width: 35%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
+		<div id = "widget2" style = "height: 400px; width: 40%; float: left; top: 500px; display: inline; margin-top:30px;"></div>
+        </div>
+        <script type="text/javascript" src="https://accutrade.sisense.com/js/sisense.v1.js"></script> <!-- replace with your Sisense server address -->
+        <script type = "text/javascript">
+            console.log("starts here");
+            Sisense.connect('https://accutrade.sisense.com', false)
+            .then((app) => {
+                // console.log("Maybe working?");
+                app.dashboards.load('603533575edfde002b356ccf') //replace with your dashboard id
+                .then((dash) => {
+                    dash.widgets.get('6035345c5edfde002b356cdc').container = document.getElementById("widget1"); //replace with one of your widgets' id.
+                    dash.widgets.get('603533ad5edfde002b356cd8').container = document.getElementById("widget2");
+		    dash.refresh();
+                })
+                .catch((e) => {
+                    // console.error("Sisense error");
+                    console.error(e);
+                });
+            })
+            .catch((e) => {
+                // console.error("Sisense error");
+                console.error(e);
+            });
+        </script>
+    </body>
+</html>

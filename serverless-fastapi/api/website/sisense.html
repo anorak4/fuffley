@@ -11,7 +11,6 @@
         <div id = "sisenseApp">
             <div id = "widget1" style = "height: 400px; width: 35%; float: left; top: 10px; display: inline; margin-top:30px;"></div>
 		    <div id = "widget2" style = "height: 400px; width: 40%; float: left; top: 10px; display: inline; margin-top:30px;"></div>
-            <div style = "height: 400px; width: 40%; float: left; top: 500px; display: inline; margin-top:30px;">{{location}}</div>
         </div>
 	<script type="text/javascript" src="{{location}}/api/v1/plugins/get_info"></script> <!-- Since we want to avoid the redirect to an SSO handler, we make an inital request to sisense with JWT token. On successful auth, 
 	Sisense passes the cookie which is then used by Sisense.Js and other methods to retrieve Sisense dashboards/widgets. For async loading, please make sure that this call is made
@@ -22,12 +21,44 @@
     sure the js library is loaded before its methods are called. -->
         <script type = "text/javascript">
             console.log("starts here");
-            Sisense.connect('{{hostname}}')
+            Sisense.connect('{{hostname}}', true)
             .then((app) => {
-                app.dashboards.load('603533575edfde002b356ccf') // Replace with your dashboard id. For performance, consider loading widgets individually instead of loading the entire dashboard.
+                app.dashboards.load('613a32e54c961e0035c51bb2') // Replace with your dashboard id. For performance, consider loading widgets individually instead of loading the entire dashboard.
                 .then((dash) => {
-                    dash.widgets.get('6035345c5edfde002b356cdc').container = document.getElementById("widget1"); // Replace with one of your widgets' id.
-                    dash.widgets.get('603533ad5edfde002b356cd8').container = document.getElementById("widget2");
+                            var applyFilter = function (dim, value, activeDashboard) {
+
+                                // Get the active dashboard, only run if sisense is loaded
+                                if (activeDashboard) {
+                                    // Create the filter options
+                                    var filterOptions = {
+                                        save: true,
+                                        refresh: true
+                                    };
+                                    //  Create the jaql for the filter
+                                    var jaql = {
+                                        'datatype': 'text',
+                                        'dim': dim,
+                                        'filter': {
+                                            'multiSelection': true,
+                                            'members': value,
+                                            'explicit': true
+                                        },
+                                        "title": dim
+                                    };
+
+                                    // Create the filter jaql
+                                    var applyJaql = {
+                                        jaql: jaql
+                                    };
+
+                                    // Set the new filter
+                                    activeDashboard.$$model.filters.update(applyJaql, filterOptions);
+                                }
+                                };
+                            // applyFilter("[appraisal_lists.model]",["2 SERIES", "3 SERIES", "X3"],dash); // Make sure the value is passed in as an array
+                    
+                    dash.widgets.get('613a32e54c961e0035c51bb4').container = document.getElementById("widget1"); // Replace with one of your widgets' id.
+                    dash.widgets.get('613a32e54c961e0035c51bb3').container = document.getElementById("widget2");
 		    dash.refresh();
                 })
                 .catch((e) => {
