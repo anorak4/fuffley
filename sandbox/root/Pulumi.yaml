@@ -1,0 +1,6 @@
+name: sandbox
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: sandbox
