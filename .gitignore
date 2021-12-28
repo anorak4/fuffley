@@ -112,3 +112,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+Databases/moviedata.json
+serverless-fastapi/api/localhost-key.pem
+serverless-fastapi/api/localhost.pem
