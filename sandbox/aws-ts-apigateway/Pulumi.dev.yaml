@@ -1,0 +1,4 @@
+config:
+  aws:profile: sandbox
+  aws:region: us-east-1
+  pulumi:template: https://github.com/pulumi/examples/tree/master/aws-ts-apigateway

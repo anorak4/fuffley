@@ -141,3 +141,7 @@ sns_topic_policy = ecs_eventrule_topic.arn.apply(lambda arn: aws.iam.get_policy_
 default = aws.sns.TopicPolicy("default",
     arn=ecs_eventrule_topic.arn,
     policy=sns_topic_policy.json)
+
+#####################
+# CodeBuild #
+#####################

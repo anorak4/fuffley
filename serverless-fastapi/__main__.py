@@ -9,6 +9,57 @@ region = aws.config.region
 
 custom_stage_name = 'serverless-fastapi-'
 
+# ##################
+# ## Domain
+# ##################
+
+# # Create API Gateway Domain.
+
+# import pulumi
+# import pulumi_aws as aws
+
+# import pulumi
+# import pulumi_aws as aws
+
+# optimaldevops_certificate = aws.acm.Certificate("optimaldevopsCertificate",
+#     domain_name="optimaldevops.com",
+#     validation_method="DNS")
+# optimaldevops_zone = aws.route53.get_zone(name="optimaldevops.com",
+#     private_zone=False)
+# optimaldevops_record = []
+# for range in [{"key": k, "value": v} for [k, v] in enumerate({dvo.domainName: {
+#     name: dvo.resourceRecordName,
+#     record: dvo.resourceRecordValue,
+#     type: dvo.resourceRecordType,
+# } for dvo in optimaldevops_certificate.optimaldevops_record.domain_validation_options})]:
+#     optimaldevops_record.append(aws.route53.Record(f"optimaldevopsRecord-{range['key']}",
+#         allow_overwrite=True,
+#         name=range["value"]["name"],
+#         records=[range["value"]["record"]],
+#         ttl=60,
+#         type=range["value"]["type"],
+#         zone_id=optimaldevops_zone.zone_id))
+# optimaldevops_certificate_validation = aws.acm.CertificateValidation("optimaldevopsCertificateValidation",
+#     certificate_arn=optimaldevops_certificate.arn,
+#     validation_record_fqdns=optimaldevops_record.apply(lambda optimaldevops_record: [record.fqdn for record in optimaldevops_record]))
+# # ... other configuration ...
+# optimaldevops_listener = aws.lb.Listener("optimaldevopsListener", certificate_arn=optimaldevops_certificate_validation.certificate_arn)
+
+# example_domain_name = aws.apigateway.DomainName("exampleDomainName",
+#     certificate_arn=aws_acm_certificate_validation["example"]["certificate_arn"],
+#     domain_name="api.example.com")
+# # Example DNS record using Route53.
+# # Route53 is not specifically required; any DNS host can be used.
+# example_record = aws.route53.Record("exampleRecord",
+#     name=example_domain_name.domain_name,
+#     type="A",
+#     zone_id=aws_route53_zone["example"]["id"],
+#     aliases=[aws.route53.RecordAliasArgs(
+#         evaluate_target_health=True,
+#         name=example_domain_name.cloudfront_domain_name,
+#         zone_id=example_domain_name.cloudfront_zone_id,
+#     )])
+
 ##################
 ## S3 bucket
 ##################
