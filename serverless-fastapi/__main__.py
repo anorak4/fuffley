@@ -4,6 +4,8 @@ import pulumi
 import pulumi_aws as aws
 import iam
 import json
+from pulumi_aws import iam
+from string import Template
 
 region = aws.config.region
 
@@ -39,8 +41,47 @@ serverless_fastapi_bucket_object = aws.s3.BucketObject("serverless-fastapi-bucke
 
 # Create a Lambda function, using code from the `./app` folder.
 
+lambda_role = iam.Role('lambdaRole',
+    assume_role_policy="""{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": "sts:AssumeRole",
+                "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                },
+                "Effect": "Allow",
+                "Sid": ""
+            }
+        ]
+    }"""
+)
+
+lambda_role_policy = iam.RolePolicy('lambdaRolePolicy',
+    role=lambda_role.id,
+    policy=Template("""{
+        "Version": "2012-10-17",
+        "Statement": [{
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+        },
+        {
+    
+            "Action": ["s3:GetObject"],
+            "Effect": "Allow",
+            "Resource": ["$arn"]
+        }
+        ]
+    }""").substitute(arn=serverless_fastapi_bucket.arn.apply(lambda arn: arn+"/*"))
+)
+
 serverless_fastapi_lambda_func = aws.lambda_.Function("serverless-fastapi-lambda",
-    role=iam.lambda_role.arn,
+    role=lambda_role.arn,
     runtime="python3.8",
     handler="main.handler",
     s3_bucket=serverless_fastapi_bucket.id,
